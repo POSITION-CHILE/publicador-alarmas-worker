@@ -9,8 +9,9 @@
 .env
 .env.*
 !.env.example
-cfg_publicador_alarma.txt
-cfg_publicador_alarma.prod.txt
+cfg_publicador_alarma*.txt
+*.iml
+publicador_alarmas.iml
 
 # Build outputs
 **.class/private

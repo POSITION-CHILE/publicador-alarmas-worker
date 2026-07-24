@@ -3,5 +3,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - ./cfg_publicador_alarma.txt:/app/cfg_publicador_alarmas.txt:ro
+    env_file:
+      - .env

@@ -5,20 +5,14 @@
 package com.position.publicador_alarmas;
 
 import com.google.gson.Gson;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.sql.SQLException;
-//import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-//import java.util.Calendar;
 import java.util.Date;
-//import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
@@ -227,94 +221,49 @@ public class funciones
     
     tipo_datos.datos_Registros_conf asigna_Registros_conf() {
         final tipo_datos.datos_Registros_conf retorno = new tipo_datos.datos_Registros_conf();
-        try {
-            final String path = new File(".").getCanonicalPath();
-            final File f = new File(path + "/cfg_publicador_alarmas.txt");
-            final BufferedReader entrada = new BufferedReader(new FileReader(f));
-            String[] te = entrada.readLine().split(":");
-            final String nombre_tabla_alarmas = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_publicador_alm = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_publicador_alm_vel = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_obtener_movil = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_publicador_alm_gps = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String key_publicador_api = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_zonas = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_zonas_oculta = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_calle_cerca = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_zonas_oculta_cerca = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_obtener_nombre_poligono = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String key_zona_api = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String url_eventos_especiales = "http://" + te[1].trim();
-            te = entrada.readLine().split(":");
-            final String key_eventos_api = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String cuenta_api = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String tiempo_delate = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String fecha_hora_minima = te[1].trim().replace("_", ":");
-            te = entrada.readLine().split(":");
-            final String nodo = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String nodo_alm = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String nodo_pg = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String servidor_gps = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String servidor_alm = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String servidor_contenedor = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String servidor_configuracion = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String servidor_vls = te[1].trim();
-            te = entrada.readLine().split(":");
-            final String alarmas_en_poligono = te[1].trim();
-            retorno.nombre_tabla_alarmas = nombre_tabla_alarmas;
-            retorno.url_publicador_alm = url_publicador_alm;
-            retorno.url_publicador_alm_vel = url_publicador_alm_vel;
-            retorno.url_obtener_movil = url_obtener_movil;
-            retorno.url_publicador_alm_gps = url_publicador_alm_gps;
-            retorno.key_publicador_api = key_publicador_api;
-            retorno.url_zonas = url_zonas;
-            retorno.url_zonas_oculta = url_zonas_oculta;
-            retorno.url_calle_cerca = url_calle_cerca;
-            retorno.url_zonas_oculta_cerca = url_zonas_oculta_cerca;
-            retorno.key_zona_api = key_zona_api;
-            retorno.key_eventos_api = key_eventos_api;
-            retorno.url_eventos_especiales = url_eventos_especiales;
-            retorno.cuenta_api = cuenta_api;
-            retorno.url_obtener_nombre_poligono = url_obtener_nombre_poligono;
-            retorno.tiempo_delate = tiempo_delate;
-            retorno.fecha_hora_minima = fecha_hora_minima;
-            retorno.nodo = nodo;
-            retorno.nodo_alm = nodo_alm;
-            retorno.nodo_pg = nodo_pg;
-            retorno.url_publicador_alm_vel = url_publicador_alm_vel;
-            retorno.servidor_configuracion = servidor_configuracion;
-            retorno.servidor_vls = servidor_vls;
-            retorno.servidor_contenedor = servidor_contenedor;
-            retorno.servidor_alm = servidor_alm;
-            retorno.servidor_gps = servidor_gps;
-            retorno.alarmas_en_poligono = alarmas_en_poligono;
-        }
-        catch (IOException ex) {
-            System.out.println("No se pudo leer el archivo de texto.");
-        }
+        retorno.nombre_tabla_alarmas = env("NOMBRE_TABLA_ALARMAS");
+        retorno.url_publicador_alm = envHttp("URL_PUBLICADOR_ALM");
+        retorno.url_publicador_alm_vel = envHttp("URL_PUBLICADOR_ALM_VEL");
+        retorno.url_obtener_movil = envHttp("URL_OBTENER_MOVIL");
+        retorno.url_publicador_alm_gps = envHttp("URL_PUBLICADOR_ALM_GPS");
+        retorno.key_publicador_api = env("KEY_PUBLICADOR_API");
+        retorno.url_zonas = envHttp("URL_ZONAS");
+        retorno.url_zonas_oculta = envHttp("URL_ZONAS_OCULTA");
+        retorno.url_calle_cerca = envHttp("URL_CALLE_CERCA");
+        retorno.url_zonas_oculta_cerca = envHttp("URL_ZONAS_OCULTA_CERCA");
+        retorno.url_obtener_nombre_poligono = envHttp("URL_OBTENER_NOMBRE_POLIGONO");
+        retorno.key_zona_api = env("KEY_ZONA_API");
+        retorno.url_eventos_especiales = envHttp("URL_EVENTOS_ESPECIALES");
+        retorno.key_eventos_api = env("KEY_EVENTOS_API");
+        retorno.cuenta_api = env("CUENTA_API");
+        retorno.tiempo_delate = env("TIEMPO_DELATE");
+        retorno.fecha_hora_minima = env("FECHA_HORA_MINIMA").replace("_", ":");
+        retorno.nodo = env("NODO");
+        retorno.nodo_alm = env("NODO_ALM");
+        retorno.nodo_pg = env("NODO_PG");
+        retorno.servidor_gps = env("SERVIDOR_GPS");
+        retorno.servidor_alm = env("SERVIDOR_ALM");
+        retorno.servidor_contenedor = env("SERVIDOR_CONTENEDOR");
+        retorno.servidor_configuracion = env("SERVIDOR_CONFIGURACION");
+        retorno.servidor_vls = env("SERVIDOR_VLS");
+        retorno.alarmas_en_poligono = env("ALARMAS_EN_POLIGONO");
         return retorno;
+    }
+
+    private String env(final String key) {
+        final String value = System.getenv(key);
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalStateException("Falta variable de entorno requerida: " + key);
+        }
+        return value.trim();
+    }
+
+    private String envHttp(final String key) {
+        final String value = env(key);
+        if (value.startsWith("http://") || value.startsWith("https://")) {
+            return value;
+        }
+        return "http://" + value;
     }
     
     Registros_alm_insert asigna_data_alm_insert(final tipo_datos.Tupla_alm reg_tupla, final String key, final String cuenta, final String dato_historico, final String tipo_alm, final int cod_alm, final int B5, final String tiempo_demora_alarma, final String nodo) {
