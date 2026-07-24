@@ -1,47 +1,59 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.position.publicador_alarmas;
+
+import java.util.Vector;
 
 /**
  *
  * @author egatica
  */
-public class publicador_alarmas
+public class Publicador_alarmas implements Runnable
 {
-    HttpURLConnection_json js;
-    funciones fun;
+    int n_procesos;
+    public static Vector clientesActivos;
+    public static funciones fun;
+    public static tipo_datos.datos_Registros_conf conf;
+    publicador_regalm publica_alarmas;
     
-    public publicador_alarmas() {
-        this.js = new HttpURLConnection_json();
-        this.fun = new funciones();
-    }
-    
-    String inserta_alarmas_gps(tipo_datos.Tupla_alm reg, int cod_alm, String user1, String nombre_poligono, tipo_datos.datos_Registros_conf conf) {
-        //String dato_historico = "0";
-        //String tipo_alm = "A";
-        //String tiempo_demora_alarma = "00:00:00";
-        Registros_alm_gps_insert data_insert = this.fun.asigna_data_alm_gps_insert(reg, conf.key_publicador_api, conf.cuenta_api, "0", "A", cod_alm, "00:00:00", nombre_poligono, user1, conf.nodo);
-        String resultado = this.js.post_alm_gps(conf.url_publicador_alm_gps, data_insert);
-        if ("error".equals(resultado)) {
-            return "error";
+    public static void esperarXsegundos(final int segundos) {
+        try {
+            Thread.sleep(segundos * 1000);
         }
-        return resultado;
+        catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }    
+    
+    public Publicador_alarmas(final int n_procesos) {
+        publica_alarmas = new publicador_regalm();
+        System.out.println("Crea.....:"+n_procesos);
+        Publicador_alarmas.clientesActivos.addElement(n_procesos);
+        this.n_procesos = n_procesos;
+    }
+    //publicador_alarmas 1  to 59
+    //publicador_alarmas_recal 60 to 60 
+    public static void main(final String[] args) {
+        while (true) {
+            for (int n_procesos =1 ; n_procesos <=59; ++n_procesos) {
+                if (!Publicador_alarmas.clientesActivos.contains(n_procesos)) {
+                    final Runnable proceso1 = new Publicador_alarmas(n_procesos);
+                    new Thread(proceso1).start();
+                }
+            }
+            //System.out.println("Revisa Procesos cada 5 segundo");
+            Publicador_alarmas.esperarXsegundos(10);
+        }
     }
     
-    /*boolean inserta_alarmas(tipo_datos.Tupla_alm reg, int cod_alm, int B5, tipo_datos.datos_Registros_conf conf) {
-        //String dato_historico = "0";
-        //String tipo_alm = "A";
-        //String tiempo_demora_alarma = "00:00:00";
-        Registros_alm_insert data_insert = this.fun.asigna_data_alm_insert(reg, conf.key_publicador_api, conf.cuenta_api, "0", "A", cod_alm, B5, "00:00:00", conf.nodo_alm);
-        this.js.post_alm(conf.url_publicador_alm, data_insert);
-        return true;
-    }*/
+    @Override
+    public void run() {
+        System.out.println("Inicia.....:"+n_procesos);
+        publica_alarmas.nuevo_publicador_regalm(n_procesos, Publicador_alarmas.conf);
+    }
     
-    /*boolean inserta_alarmas_vel(tipo_datos.Tupla_alm reg, int vel_png, String nombreplng, long id_poligono, String user1, tipo_datos.datos_Registros_conf conf) {
-        Registros_alm_insert_vel data_insert = this.fun.asigna_data_alm_vel_insert(reg, conf.key_publicador_api, conf.cuenta_api, vel_png, nombreplng, id_poligono, user1, conf.nodo);
-        String resultado = this.js.post_alm_vel(conf.url_publicador_alm, data_insert);
-        return true;
-    }*/
+    static {
+        Publicador_alarmas.clientesActivos = new Vector();
+        Publicador_alarmas.fun = new funciones();
+        Publicador_alarmas.conf=Publicador_alarmas.fun.asigna_Registros_conf();
+    }
 }
