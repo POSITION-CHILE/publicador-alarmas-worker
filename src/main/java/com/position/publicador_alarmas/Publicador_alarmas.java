@@ -1,3 +1,7 @@
+package com.position.publicador_alarmas;
+
+import java.util.Vector;
+
 public class Publicador_alarmas implements Runnable
 {
     int n_procesos;

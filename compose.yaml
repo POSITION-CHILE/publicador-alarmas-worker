@@ -1,0 +1,6 @@
+services:
+  worker:
+    image: publicador-alarmas-worker:latest
+    restart: unless-stopped
+    volumes:
+      - ./cfg_publicador_alarma.txt:/app/cfg_publicador_alarmas.txt:ro

@@ -1,0 +1,20 @@
+# Git metadata
+.git
+
+# Build outputs
+target
+
+# Secret / local runtime config
+cfg_publicador_alarma.txt
+cfg_publicador_alarma.prod.txt
+.env
+.env.*
+
+# Repository-only files that should not enter Docker builds
+.github
+publicador_alarmas.iml
+
+# OS / editor files
+.DS_Store
+.idea
+*.iml
