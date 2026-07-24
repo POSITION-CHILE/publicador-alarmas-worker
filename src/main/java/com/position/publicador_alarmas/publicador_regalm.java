@@ -15,6 +15,7 @@ import java.util.ArrayList;
  */
 public class publicador_regalm
 {
+    private final LogfmtLogger log;
     HttpURLConnection_json js;
     funciones fun;
     valida val;
@@ -22,9 +23,17 @@ public class publicador_regalm
     static ArrayList<PoligonoMovil> reg_PoligonoMovilLista;    
     
     public publicador_regalm() {
+        this.log = new LogfmtLogger();
         this.js = new HttpURLConnection_json();
         this.fun = new funciones();
         this.val = new valida();
+    }
+
+    public void setInteractionContext(final InteractionContext context) {
+        if (context != null) {
+            this.js.setInteractionContext(context.withComponent("http"));
+            this.fun.setInteractionContext(context.withComponent("funciones"));
+        }
     }
     
     public void nuevo_publicador_regalm(int n_procesos, tipo_datos.datos_Registros_conf conf)  {
@@ -37,10 +46,14 @@ public class publicador_regalm
         int cod_alm;
         long last_id;
         try {
+            final InteractionContext workerContext = InteractionContext.root("publicador_regalm").withWorkerId(Integer.toString(n_procesos)).withTag("nodo_alm", conf.nodo_alm).withTag("servidor_alm", conf.servidor_alm);
+            this.setInteractionContext(workerContext);
             while (true) {
                 error = "";
-                //System.out.println("Captura registros... de:"+n_procesos);
+                final InteractionContext pollContext = workerContext.withInteractionId(java.util.UUID.randomUUID().toString()).withOperation("poll");
+                log.info("poll.started", pollContext, "sleep_seconds", conf.tiempo_delate);
                 data = this.js.get(conf.url_publicador_alm + "/nodo_alm/" + conf.nodo_alm + "/sql_num/" + String.valueOf(n_procesos) + "/servidor/" + conf.servidor_alm + "/cuenta/" + conf.cuenta_api + "/key/" + conf.key_publicador_api, 5000);
+                log.info("poll.http_completed", pollContext, "result", data == null ? "null" : ("error".equals(data) ? "error" : "ok"), "bytes", data == null ? 0 : data.length());
                 int tiempo_sleep = Integer.parseInt(conf.tiempo_delate);
                 if (data != null) {
                     if ("error".equals(data)){
@@ -49,6 +62,7 @@ public class publicador_regalm
                     }
                     tiempo_sleep = 0;
                     Registros_alm msg = (Registros_alm)new Gson().fromJson(data, (Class)Registros_alm.class);
+                    log.info("batch.received", pollContext, "records", msg.response == null ? 0 : msg.response.length);
                     for (int pos_reg_tabla = 0; pos_reg_tabla <= msg.response.length - 1; ++pos_reg_tabla) {
                         last_id = msg.response[pos_reg_tabla].reg;
                         boolean borra_alm = true;
@@ -91,7 +105,7 @@ public class publicador_regalm
                                         //resultado="00-" + eventos_esp_alm.i4;
                                         resultado = this.js.post_event_esp_alm(conf.url_eventos_especiales, eventos_esp_alm);
                                         error = "post_event_esp_alm =>" + resultado + "<=";
-                                        //System.out.println("RETORNO " + error);
+                                        log.info("record.http_event_result", pollContext, "last_id", last_id, "resultado", resultado);
                                         boolean inserta_alm = false;
 
                                         if (resultado!=null){
@@ -118,6 +132,7 @@ public class publicador_regalm
                                             }
                                             //cod_alm = reg.i4;
                                             cod_alm = Integer.parseInt(resultado_arr[1]);
+                                            log.info("record.decision", pollContext, "last_id", last_id, "insert", inserta_alm, "delete", borra_alm, "cod_alm", cod_alm, "idpoly", reg.idpoly);
 
                                             retvalinsert = "";
                                             if (inserta_alm) {
@@ -132,12 +147,14 @@ public class publicador_regalm
                                             
                                             if ("error".equals(retvalinsert)) {
                                                 System.out.println("=>Inser error " + user1 + " " + patente + " " + nombre_poligono + " T LMOVIL:" + publicador_regalm.reg_MovilLista.size() + " T LMOVILPOLI:" + publicador_regalm.reg_PoligonoMovilLista.size());
+                                                log.warn("record.insert_failed", pollContext, "last_id", last_id, "user1", user1, "patente", patente, "polygon", nombre_poligono);
                                             }
                                             //else {
                                             //    System.out.println(retvalinsert);
                                             //}
                                         }else{
                                             borra_alm = false;
+                                            log.warn("record.rejected", pollContext, "last_id", last_id, "reason", "empty_event_response");
                                         }
                                     }
                                 }
@@ -146,19 +163,21 @@ public class publicador_regalm
                         if (borra_alm) {
                             //marca para borrar campo tr=1
                             String parameters = "key=" + conf.key_publicador_api + "&cuenta=" + conf.cuenta_api + "&nodo_alm=" + conf.nodo_alm + "&last_id=" + String.valueOf(last_id) + "&servidor=" + conf.servidor_alm;
-                            js.put(conf.url_publicador_alm, parameters);
+                            final String ack = js.put(conf.url_publicador_alm, parameters);
+                            log.info("ack.marked", pollContext, "last_id", last_id, "result", ack);
                         }
                     }
                     //borra todos los marcados
                     String parameters2 = "key=" + conf.key_publicador_api + "&cuenta=" + conf.cuenta_api + "&nodo_alm=" + conf.nodo_alm + "&servidor=" + conf.servidor_alm;
-                    this.js.detete(conf.url_publicador_alm, parameters2);
+                    final String deleteAck = this.js.detete(conf.url_publicador_alm, parameters2);
+                    log.info("ack.deleted", pollContext, "result", deleteAck);
                     //System.out.println("\nRegistros borrados ::..." + "("+n_procesos+")" + data_borra + "\n");
                 }
                 if (tiempo_sleep > 0) {
                     //System.out.println(conf.nodo_alm + " Numero " + String.valueOf(n_procesos) + " Revisa tabla cada " + tiempo_sleep + " segundos ....");
                     esperarXsegundos(tiempo_sleep);
                 }
-                
+
             }
         }
         catch (JsonSyntaxException | NumberFormatException | SQLException e2) {
@@ -166,11 +185,13 @@ public class publicador_regalm
             System.out.println("Leyendo data---:>"+data+"<" );
             System.out.println("Resultado Eventos Especiales---:>" + resultado +"<" );
             System.out.println("Salida Insert---:> "+ retvalinsert+"<");
+            log.error("poll.failed", InteractionContext.root("publicador_regalm").withWorkerId(Integer.toString(n_procesos)), "error", e2.getClass().getSimpleName(), "message", e2.getMessage(), "last_error", error);
             //Publicador_alarmas.clientesActivos.removeElement(n_procesos);
             System.exit(0);
         }
         finally {
             System.out.println("Remove.....:"+n_procesos);
+            log.info("worker.removed", InteractionContext.root("publicador_regalm").withWorkerId(Integer.toString(n_procesos)));
             Publicador_alarmas.clientesActivos.removeElement(n_procesos);
         }
     }

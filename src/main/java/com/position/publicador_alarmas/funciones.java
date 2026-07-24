@@ -29,16 +29,27 @@ import javax.xml.transform.stream.StreamSource;
  */
 public class funciones
 {
+    private final LogfmtLogger log;
     HttpURLConnection_json js;
     private final Function<String, String> envProvider;
+    private InteractionContext interactionContext;
     
     public funciones() {
         this(System::getenv);
     }
 
     funciones(final Function<String, String> envProvider) {
+        this.log = new LogfmtLogger();
         this.js = new HttpURLConnection_json();
         this.envProvider = envProvider;
+        this.interactionContext = InteractionContext.root("funciones");
+    }
+
+    public void setInteractionContext(final InteractionContext context) {
+        if (context != null) {
+            this.interactionContext = context.withComponent("funciones");
+            this.js.setInteractionContext(context.withComponent("http"));
+        }
     }
     
     public void asiga_lista(final ArrayList<Movil> reg_MovilLista_local) {
@@ -65,6 +76,7 @@ public class funciones
         }
             catch (Exception e) {
                 System.out.println("Grande-----carga_arr_Movil =>"+n_procesos+"<=" + e);
+                log.warn("mobil.cache_load_failed", this.interactionContext.withWorkerId(Integer.toString(n_procesos)), "l2", reg_tupla.l2, "message", e.getMessage());
                 System.exit(0);        
         }         
         if (!existe) {
@@ -87,6 +99,7 @@ public class funciones
                 reg_MovilLista_local.add(Movil_perfil);
                 this.asiga_lista(reg_MovilLista_local);
                 pos = reg_MovilLista_local.size() - 1;
+                log.info("mobil.cache_loaded", this.interactionContext.withWorkerId(Integer.toString(n_procesos)).withTag("l2", Long.toString(reg_tupla.l2)), "plate", msg_d_m.response[0].getplate().trim(), "index", pos);
                 
             }
           
@@ -164,14 +177,17 @@ public class funciones
                 reg_PoligonoMovilLista_local.add(PoligonoMovil_perfil);
                 this.asiga_listaPologonoMovil(reg_PoligonoMovilLista_local);
                 pos = reg_PoligonoMovilLista_local.size() - 1;
+                log.info("polygon.cache_loaded", this.interactionContext.withTag("l2", Long.toString(reg_tupla.l2)).withTag("idpoly", Long.toString(reg_tupla.idpoly)), "name", datos_poligono.nombre);
             }else{
                 System.out.println("ERROR TRAE POLIGONOS");   
+                log.warn("polygon.fetch_empty", this.interactionContext.withTag("l2", Long.toString(reg_tupla.l2)).withTag("idpoly", Long.toString(reg_tupla.idpoly)));
             }
          
         }
                     }
             catch (IOException | JAXBException e) {
                 System.out.println("Grande-----obtiene_datos_poligono =>" + e);
+                log.warn("polygon.fetch_failed", this.interactionContext, "idpoly", reg_tupla.idpoly, "message", e.getMessage());
                 System.exit(0);        
             }     
         return pos;

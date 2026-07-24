@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.position.publicador_alarmas;
 
 import com.google.gson.Gson;
@@ -21,13 +17,44 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author egatica
- */
 public class HttpURLConnection_json {
+    private final LogfmtLogger log;
+    private InteractionContext interactionContext;
+
+    public HttpURLConnection_json() {
+        this(new LogfmtLogger());
+    }
+
+    HttpURLConnection_json(final LogfmtLogger log) {
+        this.log = log;
+        this.interactionContext = InteractionContext.root("http");
+    }
+
+    public void setInteractionContext(final InteractionContext context) {
+        if (context != null) {
+            this.interactionContext = context.withComponent("http");
+        }
+    }
+
+    private InteractionContext ctx(final String operation) {
+        return this.interactionContext.withOperation(operation).withPhase("http");
+    }
+
+    private void started(final String operation, final String method) {
+        this.log.info("http.request_started", ctx(operation), "method", method);
+    }
+
+    private void completed(final String operation, final String method, final int status, final long elapsedMs, final String outcome, final Integer bytes) {
+        this.log.info("http.request_completed", ctx(operation), "method", method, "status", status, "elapsed_ms", elapsedMs, "outcome", outcome, "bytes", bytes == null ? 0 : bytes);
+    }
+
+    private void failed(final String operation, final String method, final Exception ex, final long elapsedMs) {
+        this.log.error("http.request_failed", ctx(operation), "method", method, "elapsed_ms", elapsedMs, "error", ex.getClass().getSimpleName(), "message", ex.getMessage());
+    }
 
     public String detete(final String url, final String parameters) {
+        final long startedAt = System.nanoTime();
+        started("delete", "DELETE");
         try {
             final byte[] bytes = parameters.getBytes();
             final URL u = new URL(url);
@@ -44,19 +71,25 @@ public class HttpURLConnection_json {
             final int status = c.getResponseCode();
             switch (status) {
                 case 200 -> {
+                    completed("delete", "DELETE", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", bytes.length);
                     return "ok";
                 }
                 case 201 -> {
+                    completed("delete", "DELETE", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", bytes.length);
                     return "error";
                 }
             }
         } catch (IOException ex) {
+            failed("delete", "DELETE", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
+        completed("delete", "DELETE", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
-    
+
     public String put(final String url, final String parameters) {
+        final long startedAt = System.nanoTime();
+        started("put", "PUT");
         try {
             final byte[] bytes = parameters.getBytes();
             final URL u = new URL(url);
@@ -73,38 +106,28 @@ public class HttpURLConnection_json {
             final int status = c.getResponseCode();
             switch (status) {
                 case 200 -> {
+                    completed("put", "PUT", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", bytes.length);
                     return "ok";
                 }
                 case 201 -> {
+                    completed("put", "PUT", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", bytes.length);
                     return "error";
                 }
                 case 500 -> {
-                    /*final InputStream errorstream = c.getErrorStream();
-                    BufferedReader br = null;
-                    if (errorstream == null) {
-                        final InputStream inputstream = c.getInputStream();
-                        br = new BufferedReader(new InputStreamReader(inputstream));
-                    }
-                    else {
-                        br = new BufferedReader(new InputStreamReader(errorstream));
-                    }
-                    String response = "";
-                    String nachricht;
-                    while ((nachricht = br.readLine()) != null) {
-                        response += nachricht;
-                    }
-                    System.out.println(response);*/
                     return "error";
                 }
             }
         } catch (IOException ex) {
+            failed("put", "PUT", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
+        completed("put", "PUT", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
-    
+
     public String post_event_esp(final String url, final String parameters) {
-        
+        final long startedAt = System.nanoTime();
+        started("post_event_esp", "POST");
         try {
             final byte[] bytes = parameters.getBytes();
             final URL u = new URL(url);
@@ -129,20 +152,25 @@ public class HttpURLConnection_json {
                             sb.append(line).append("\n");
                         }
                     }
+                    completed("post_event_esp", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", bytes.length);
                     return sb.toString();
                 }
-
                 case 201 -> {
+                    completed("post_event_esp", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", bytes.length);
                     return "error";
                 }
             }
         } catch (IOException ex) {
+            failed("post_event_esp", "POST", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
+        completed("post_event_esp", "POST", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
-    
+
     public String post(final String url, final Registros_insert parameters) {
+        final long startedAt = System.nanoTime();
+        started("post", "POST");
         try {
             final URL u = new URL(url);
             final HttpURLConnection c = (HttpURLConnection)u.openConnection();
@@ -163,37 +191,28 @@ public class HttpURLConnection_json {
             final int status = c.getResponseCode();
             switch (status) {
                 case 200 -> {
+                    completed("post", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", null);
                     return "ok";
                 }
                 case 201 -> {
+                    completed("post", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", null);
                     return "error";
                 }
                 case 500 -> {
-                    /*final InputStream errorstream = c.getErrorStream();
-                    BufferedReader br = null;
-                    if (errorstream == null) {
-                        final InputStream inputstream = c.getInputStream();
-                        br = new BufferedReader(new InputStreamReader(inputstream));
-                    }
-                    else {
-                        br = new BufferedReader(new InputStreamReader(errorstream));
-                    }
-                    String response = "";
-                    String nachricht;
-                    while ((nachricht = br.readLine()) != null) {
-                        response += nachricht;
-                    }
-                    System.out.println(response);*/
                     return "error";
                 }
             }
         } catch (JsonIOException | IOException ex) {
+            failed("post", "POST", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
+        completed("post", "POST", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
-    
+
     public String post_alm_gps(final String url, final Registros_alm_gps_insert parameters) {
+        final long startedAt = System.nanoTime();
+        started("post_alm_gps", "POST");
         try {
             final URL u = new URL(url);
             final HttpURLConnection c = (HttpURLConnection)u.openConnection();
@@ -228,37 +247,28 @@ public class HttpURLConnection_json {
                     while ((nachricht = br.readLine()) != null) {
                         response += nachricht;
                     }
+                    completed("post_alm_gps", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", null);
                     return response;
                 }
                 case 201 -> {
+                    completed("post_alm_gps", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", null);
                     return "error";
                 }
                 case 500 -> {
-                    /*final InputStream errorstream2 = c.getErrorStream();
-                    BufferedReader br3;
-                    if (errorstream2 == null) {
-                        final InputStream inputstream2 = c.getInputStream();
-                        br3 = new BufferedReader(new InputStreamReader(inputstream2));
-                    }
-                    else {
-                        br3 = new BufferedReader(new InputStreamReader(errorstream2));
-                    }
-                    String response2 = "";
-                    String nachricht2;
-                    while ((nachricht2 = br3.readLine()) != null) {
-                        response2 += nachricht2;
-                    }
-                    System.out.println(response2);*/
                     return "error";
                 }
             }
         } catch (JsonIOException | IOException ex) {
+            failed("post_alm_gps", "POST", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
+        completed("post_alm_gps", "POST", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
-    
+
     public String post_alm(final String url, final Registros_alm_insert parameters) {
+        final long startedAt = System.nanoTime();
+        started("post_alm", "POST");
         try {
             final URL u = new URL(url);
             final HttpURLConnection c = (HttpURLConnection)u.openConnection();
@@ -279,37 +289,28 @@ public class HttpURLConnection_json {
             final int status = c.getResponseCode();
             switch (status) {
                 case 200 -> {
+                    completed("post_alm", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", null);
                     return "ok";
                 }
                 case 201 -> {
+                    completed("post_alm", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", null);
                     return "error";
                 }
                 case 500 -> {
-                    /*final InputStream errorstream = c.getErrorStream();
-                    BufferedReader br = null;
-                    if (errorstream == null) {
-                        final InputStream inputstream = c.getInputStream();
-                        br = new BufferedReader(new InputStreamReader(inputstream));
-                    }
-                    else {
-                        br = new BufferedReader(new InputStreamReader(errorstream));
-                    }
-                    String response = "";
-                    String nachricht;
-                    while ((nachricht = br.readLine()) != null) {
-                        response += nachricht;
-                    }
-                    System.out.println(response);*/
                     return "error";
                 }
             }
         } catch (JsonIOException | IOException ex) {
+            failed("post_alm", "POST", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
+        completed("post_alm", "POST", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
-    
+
     public String post_alm_vel(final String url, final Registros_alm_insert_vel parameters) {
+        final long startedAt = System.nanoTime();
+        started("post_alm_vel", "POST");
         try {
             final URL u = new URL(url);
             final HttpURLConnection c = (HttpURLConnection)u.openConnection();
@@ -330,55 +331,30 @@ public class HttpURLConnection_json {
             final int status = c.getResponseCode();
             switch (status) {
                 case 200 -> {
+                    completed("post_alm_vel", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", null);
                     return "ok";
                 }
                 case 201 -> {
-                    /*final InputStream errorstream201 = c.getErrorStream();
-                    BufferedReader br201 = null;
-                    if (errorstream201 == null) {
-                        final InputStream inputstream = c.getInputStream();
-                        br201 = new BufferedReader(new InputStreamReader(inputstream));
-                    }
-                    else {
-                        br201 = new BufferedReader(new InputStreamReader(errorstream201));
-                    }
-                    String response201 = "";
-                    String nachricht201;
-                    while ((nachricht201 = br201.readLine()) != null) {
-                        response201 += nachricht201;
-                    }
-                    System.out.println(response201);*/
+                    completed("post_alm_vel", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", null);
                     return "error";
                 }
                 case 500 -> {
-                    /*final InputStream errorstream202 = c.getErrorStream();
-                    BufferedReader br202 = null;
-                    if (errorstream202 == null) {
-                        final InputStream inputstream2 = c.getInputStream();
-                        br202 = new BufferedReader(new InputStreamReader(inputstream2));
-                    }
-                    else {
-                        br202 = new BufferedReader(new InputStreamReader(errorstream202));
-                    }
-                    String response202 = "";
-                    String nachricht202;
-                    while ((nachricht202 = br202.readLine()) != null) {
-                        response202 += nachricht202;
-                    }
-                    System.out.println(response202);*/
                     return "error";
                 }
             }
         } catch (JsonIOException | IOException ex) {
+            failed("post_alm_vel", "POST", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
+        completed("post_alm_vel", "POST", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
-    
+
     public String post_event_esp_alm(final String url, final Registros_eventos_especiales_alm parameters) {
+        final long startedAt = System.nanoTime();
+        started("post_event_esp_alm", "POST");
         try {
             final URL u = new URL(url);
-            //System.out.println("post_event_esp_alm POST=>" + url + "<=");
             final HttpURLConnection c = (HttpURLConnection)u.openConnection();
             c.setDoOutput(true);
             c.setDoInput(true);
@@ -411,53 +387,29 @@ public class HttpURLConnection_json {
                     while ((oknachricht = okbr.readLine()) != null) {
                         okresponse += oknachricht;
                     }
+                    completed("post_event_esp_alm", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", null);
                     return okresponse.replaceAll("\"", "");
                 }
                 case 201 -> {
-                    /*final InputStream errorstream201 = c.getErrorStream();
-                    BufferedReader br201 = null;
-                    if (errorstream201 == null) {
-                        final InputStream inputstream2 = c.getInputStream();
-                        br201 = new BufferedReader(new InputStreamReader(inputstream2));
-                    }
-                    else {
-                        br201 = new BufferedReader(new InputStreamReader(errorstream201));
-                    }
-                    String response201 = "";
-                    String nachricht201;
-                    while ((nachricht201 = br201.readLine()) != null) {
-                        response201 += nachricht201;
-                    }
-                    System.out.println(response201);*/
+                    completed("post_event_esp_alm", "POST", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", null);
                     return "error";
                 }
                 case 500 -> {
-                    /*final InputStream errorstream202 = c.getErrorStream();
-                    BufferedReader br202 = null;
-                    if (errorstream202 == null) {
-                        final InputStream inputstream3 = c.getInputStream();
-                        br202 = new BufferedReader(new InputStreamReader(inputstream3));
-                    }
-                    else {
-                        br202 = new BufferedReader(new InputStreamReader(errorstream202));
-                    }
-                    String response202 = "";
-                    String nachricht202;
-                    while ((nachricht202 = br202.readLine()) != null) {
-                        response202 += nachricht202;
-                    }
-                    System.out.println(response202);*/
                     return "error";
                 }
             }
         } catch (JsonIOException | IOException ex) {
+            failed("post_event_esp_alm", "POST", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
+        completed("post_event_esp_alm", "POST", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
-    
+
     public String get(final String url, final int timeout) {
         HttpURLConnection c = null;
+        final long startedAt = System.nanoTime();
+        started("get", "GET");
         try {
             final URL u = new URL(url);
             c = (HttpURLConnection)u.openConnection();
@@ -478,57 +430,22 @@ public class HttpURLConnection_json {
                             sb.append(line).append("\n");
                         }
                     }
-                    //System.out.println("GET:" + sb.toString().trim());
+                    completed("get", "GET", status, (System.nanoTime() - startedAt) / 1_000_000L, "ok", sb.length());
                     return sb.toString();
                 }
-
                 case 201 -> {
-                    /*final InputStream errorstream201 = c.getErrorStream();
-                    BufferedReader brerror201 = null;
-                    if (errorstream201 == null) {
-                        final InputStream inputstream201 = c.getInputStream();
-                        brerror201 = new BufferedReader(new InputStreamReader(inputstream201));
-                    }
-                    else {
-                        brerror201 = new BufferedReader(new InputStreamReader(errorstream201));
-                    }
-                    String response201 = "";
-                    String nachricht201;
-                    while ((nachricht201 = brerror201.readLine()) != null) {
-                        response201 += nachricht201;
-                    }
-                    System.out.println(response201);*/
+                    completed("get", "GET", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", 0);
                     return null;
                 }
                 case 500 -> {
-                    /*final InputStream errorstream202 = c.getErrorStream();
-                    BufferedReader brerror202 = null;
-                    if (errorstream202 == null) {
-                        final InputStream inputstream202 = c.getInputStream();
-                        brerror202 = new BufferedReader(new InputStreamReader(inputstream202));
-                    }
-                    else {
-                        brerror202 = new BufferedReader(new InputStreamReader(errorstream202));
-                    }
-                    String response202 = "";
-                    String nachricht202;
-                    while ((nachricht202 = brerror202.readLine()) != null) {
-                        response202 += nachricht202;
-                    }
-                    System.out.println(response202);*/
+                    completed("get", "GET", status, (System.nanoTime() - startedAt) / 1_000_000L, "error", 0);
                     return "error";
                 }
-                default ->  {
+                default -> {
                 }
             }
-        /*}
-        catch (MalformedURLException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (IOException ex2) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex2);
-        }*/
         } catch (IOException ex) {
+            failed("get", "GET", ex, (System.nanoTime() - startedAt) / 1_000_000L);
             return "error";
         }
         finally {
@@ -541,6 +458,7 @@ public class HttpURLConnection_json {
                 }
             }
         }
+        completed("get", "GET", -1, (System.nanoTime() - startedAt) / 1_000_000L, "unknown", null);
         return null;
     }
 }
