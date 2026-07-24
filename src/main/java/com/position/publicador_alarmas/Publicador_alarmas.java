@@ -1,12 +1,3 @@
-
-package com.position.publicador_alarmas;
-
-import java.util.Vector;
-
-/**
- *
- * @author egatica
- */
 public class Publicador_alarmas implements Runnable
 {
     int n_procesos;
@@ -42,8 +33,6 @@ public class Publicador_alarmas implements Runnable
         return resultado;
     }
 
-    //publicador_alarmas 1  to 59
-    //publicador_alarmas_recal 60 to 60 
     public static void main(final String[] args) {
         while (true) {
             for (int n_procesos =1 ; n_procesos <=59; ++n_procesos) {
@@ -52,7 +41,6 @@ public class Publicador_alarmas implements Runnable
                     new Thread(proceso1).start();
                 }
             }
-            //System.out.println("Revisa Procesos cada 5 segundo");
             Publicador_alarmas.esperarXsegundos(10);
         }
     }
