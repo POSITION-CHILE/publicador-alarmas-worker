@@ -1,12 +1,3 @@
-
-package com.position.publicador_alarmas;
-
-import java.util.Vector;
-
-/**
- *
- * @author egatica
- */
 public class Publicador_alarmas implements Runnable
 {
     int n_procesos;
@@ -30,8 +21,18 @@ public class Publicador_alarmas implements Runnable
         Publicador_alarmas.clientesActivos.addElement(n_procesos);
         this.n_procesos = n_procesos;
     }
-    //publicador_alarmas 1  to 59
-    //publicador_alarmas_recal 60 to 60 
+
+    static String inserta_alarmas_gps(tipo_datos.Tupla_alm reg, int cod_alm, String user1, String nombre_poligono, tipo_datos.datos_Registros_conf conf) {
+        HttpURLConnection_json js = new HttpURLConnection_json();
+        funciones fun = new funciones();
+        Registros_alm_gps_insert data_insert = fun.asigna_data_alm_gps_insert(reg, conf.key_publicador_api, conf.cuenta_api, "0", "A", cod_alm, "00:00:00", nombre_poligono, user1, conf.nodo);
+        String resultado = js.post_alm_gps(conf.url_publicador_alm_gps, data_insert);
+        if ("error".equals(resultado)) {
+            return "error";
+        }
+        return resultado;
+    }
+
     public static void main(final String[] args) {
         while (true) {
             for (int n_procesos =1 ; n_procesos <=59; ++n_procesos) {
@@ -40,7 +41,6 @@ public class Publicador_alarmas implements Runnable
                     new Thread(proceso1).start();
                 }
             }
-            //System.out.println("Revisa Procesos cada 5 segundo");
             Publicador_alarmas.esperarXsegundos(10);
         }
     }

@@ -18,7 +18,6 @@ public class publicador_regalm
     HttpURLConnection_json js;
     funciones fun;
     valida val;
-    publicador_alarmas alm;
     static ArrayList<Movil> reg_MovilLista;
     static ArrayList<PoligonoMovil> reg_PoligonoMovilLista;    
     
@@ -26,7 +25,6 @@ public class publicador_regalm
         this.js = new HttpURLConnection_json();
         this.fun = new funciones();
         this.val = new valida();
-        this.alm = new publicador_alarmas();
     }
     
     public void nuevo_publicador_regalm(int n_procesos, tipo_datos.datos_Registros_conf conf)  {
@@ -125,7 +123,7 @@ public class publicador_regalm
                                             if (inserta_alm) {
                                                 //System.out.println("Inserta.....");
                                                 System.out.println("Inserta Fecha=" + reg.d1 + ",L2=" + reg.l2 + ",I4=" + reg.i4 + ",Last id=" + last_id + ",ID poly:" + reg.idpoly + ",Nombre:>" + nombre_poligono+"<");
-                                                retvalinsert = this.alm.inserta_alarmas_gps(reg, cod_alm, user1, nombre_poligono, conf);
+                                                retvalinsert = Publicador_alarmas.inserta_alarmas_gps(reg, cod_alm, user1, nombre_poligono, conf);
                                             }
                                             else{
                                                 System.out.println("NO Inserta Fecha=" + reg.d1 + ",L2=" + reg.l2 + ",I4=" + reg.i4 + ",Last id=" + last_id + ",ID poly:" + reg.idpoly + ",Nombre:>" + nombre_poligono+"<");
