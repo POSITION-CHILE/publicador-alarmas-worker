@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.function.Function;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -29,9 +30,15 @@ import javax.xml.transform.stream.StreamSource;
 public class funciones
 {
     HttpURLConnection_json js;
+    private final Function<String, String> envProvider;
     
     public funciones() {
+        this(System::getenv);
+    }
+
+    funciones(final Function<String, String> envProvider) {
         this.js = new HttpURLConnection_json();
+        this.envProvider = envProvider;
     }
     
     public void asiga_lista(final ArrayList<Movil> reg_MovilLista_local) {
@@ -251,7 +258,7 @@ public class funciones
     }
 
     private String env(final String key) {
-        final String value = System.getenv(key);
+        final String value = this.envProvider.apply(key);
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalStateException("Falta variable de entorno requerida: " + key);
         }
