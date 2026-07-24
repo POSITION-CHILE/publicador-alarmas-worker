@@ -1,6 +1,5 @@
 services:
   worker:
-    image: publicador-alarmas-worker:latest
-    env_file:
-      - .env
+    image: "${DOCKER_IMAGE:-ghcr.io/position-chile/publicador-alarmas-worker:latest}"
+    env_file: .env
     restart: unless-stopped

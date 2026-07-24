@@ -1,16 +1,17 @@
-FROM maven:3.9.11-eclipse-temurin-21 AS build
+FROM maven:3.9.11-eclipse-temurin-25 AS build
 
 WORKDIR /build
 
 COPY pom.xml .
 COPY src ./src
 
-RUN mvn -q -DskipTests package
+RUN mvn -q -DskipTests package \
+    && mv target/publicador_hilos-*.jar target/app.jar
 
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 
 WORKDIR /app
 
-COPY --from=build /build/target/publicador_alarmas-1.0.jar /app/app.jar
+COPY --from=build /build/target/app.jar /app/app.jar
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
