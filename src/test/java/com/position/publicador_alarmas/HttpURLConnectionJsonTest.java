@@ -71,6 +71,25 @@ class HttpURLConnectionJsonTest {
         assertThat(logs).contains("component=http");
     }
 
+    @Test
+    void delete_emiteLogsEstructurados() {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final LogfmtLogger logger = new LogfmtLogger(new PrintStream(out, true, StandardCharsets.UTF_8));
+
+        final HttpURLConnection_json client = new HttpURLConnection_json(logger);
+        client.setInteractionContext(InteractionContext.root("test").withWorkerId("13"));
+
+        final String response = client.detete("http://mock.local/delete", "k=v");
+
+        assertThat(response).isEqualTo("ok");
+        final String logs = out.toString(StandardCharsets.UTF_8);
+        assertThat(logs).contains("event=http.request_started");
+        assertThat(logs).contains("event=http.request_completed");
+        assertThat(logs).contains("method=DELETE");
+        assertThat(logs).contains("status=200");
+        assertThat(logs).contains("component=http");
+    }
+
     private static final class MockFactory implements URLStreamHandlerFactory {
         @Override
         public URLStreamHandler createURLStreamHandler(final String protocol) {
@@ -128,6 +147,15 @@ class HttpURLConnectionJsonTest {
 
         @Override
         public int getResponseCode() {
+            if (this.url.getPath().toLowerCase(Locale.ROOT).contains("delete")) {
+                return 200;
+            }
+            if (this.url.getPath().toLowerCase(Locale.ROOT).contains("moviles")) {
+                return 200;
+            }
+            if (this.url.getPath().toLowerCase(Locale.ROOT).contains("nombre")) {
+                return 200;
+            }
             if (this.url.getPath().toLowerCase(Locale.ROOT).contains("post")) {
                 return 200;
             }
@@ -138,6 +166,12 @@ class HttpURLConnectionJsonTest {
         }
 
         private String responseBody() {
+            if (this.url.getPath().toLowerCase(Locale.ROOT).contains("moviles")) {
+                return "{\"response\":[{\"user1\":\"u1\",\"l2\":1001,\"plate\":\"ABC123\",\"r12\":1,\"tipo\":2,\"modem\":3,\"numero\":\"987654321\",\"rendimiento\":1.1,\"factor_correcion\":1.2,\"costo_combustible\":1.3,\"tipo_combustible\":1.4,\"marca\":\"marca\",\"modelo\":\"modelo\",\"anno\":2020,\"km_inicial\":100,\"id_equipo\":10,\"estado\":1,\"tele\":1,\"color_stop\":2,\"color_mov\":3,\"tipo_ib\":4,\"l2f\":5,\"disponible\":6,\"volt_min\":7.1,\"volt_max\":8.2,\"observacion\":\"obs\",\"capacidad\":9.3,\"altura\":10.4,\"ancho\":11.5,\"largo\":12.6,\"color_ico\":\"blue\",\"corte_motor\":7}]}";
+            }
+            if (this.url.getPath().toLowerCase(Locale.ROOT).contains("nombre")) {
+                return "<xml><response><item><id_poligono>77</id_poligono><nombre>poligono-1</nombre><user1>u1</user1><vel>50.5</vel><res_1>r1</res_1><res_2>r2</res_2><res_3>r3</res_3><res_4>r4</res_4><res_5>r5</res_5><id_capa>8</id_capa><planta>9</planta></item></response></xml>";
+            }
             if (this.url.getPath().toLowerCase(Locale.ROOT).contains("post")) {
                 return "ok";
             }
