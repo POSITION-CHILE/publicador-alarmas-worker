@@ -40,6 +40,17 @@ name classes `*Test`. At minimum, cover validation, mapping, and HTTP error
 handling for changed behavior. Run `mvn test` before submitting changes; for
 external-service behavior, prefer mocked HTTP responses over live endpoints.
 
+## Documentation Guidelines
+
+- Keep `README.md` as the entry summary of the worker and link out to the
+  operational docs.
+- Use `docs/test-cases/` for reproducible use-case verification, one case per
+  file when the behavior needs separate preconditions or expected outcomes.
+- Use `docs/improvement-roadmap.md` for gaps, risks, and pending refactors;
+  do not mix roadmap items into the test-case docs.
+- Write the docs in Spanish, but preserve literal identifiers such as class
+  names, env vars, URLs, SQL objects, and Maven/Docker commands.
+
 ## Commit & Pull Request Guidelines
 
 Existing commits are short, imperative Spanish descriptions (for example,

@@ -77,6 +77,23 @@ mvn test
 
 Si agregas cambios en HTTP, mapeo o configuración, añade o ajusta tests en el mismo paquete que el código afectado.
 
+## Casos de uso y verificación
+
+La documentación operativa del comportamiento real está en `docs/test-cases/`.
+Ahí se enumeran los flujos que sí se pueden reproducir hoy, con sus
+precondiciones, señales de éxito y validación mínima. El mapa de brechas y
+mejoras pendientes está en `docs/improvement-roadmap.md`.
+
+Casos cubiertos:
+
+- lectura de lote desde la API origen
+- validación y rechazo de registros
+- resolución de móvil y polígono
+- publicación de evento especial
+- inserción GPS cuando corresponde
+- marcado y limpieza de ACK
+- abortos del worker y fallas de infraestructura
+
 ## Contribución
 
 Usa commits cortos y descriptivos, idealmente con convención conventional commits. Para cambios grandes, trabaja en una rama de refactor y abre PR con:
@@ -85,4 +102,3 @@ Usa commits cortos y descriptivos, idealmente con convención conventional commi
 - por qué cambió
 - qué problema resuelve
 - cómo se validó
-
