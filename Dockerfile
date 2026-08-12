@@ -6,7 +6,7 @@ COPY pom.xml .
 COPY src ./src
 
 RUN mvn -q -DskipTests package \
-    && mv target/publicador_hilos-*.jar target/app.jar
+    && mv target/publicador_alarmas-*.jar target/app.jar
 
 FROM eclipse-temurin:25-jre-jammy
 
